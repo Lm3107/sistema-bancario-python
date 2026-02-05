@@ -10,6 +10,17 @@ def criar_tabela():
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS conta (
+            cursor.execute("""
+        CREATE TABLE IF NOT EXISTS transacao (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            conta_id INTEGER,
+            tipo TEXT,
+            valor REAL,
+            data TEXT,
+            FOREIGN KEY (conta_id) REFERENCES conta(id)
+        )
+    """)
+
             id INTEGER PRIMARY KEY,
             saldo REAL
         )
@@ -48,3 +59,34 @@ def atualizar_saldo(novo_saldo):
 
     conn.commit()
     conn.close()
+
+    from datetime import datetime
+
+def registrar_transacao(conta_id, tipo, valor):
+    conn = conectar()
+    cursor = conn.cursor()
+
+    data = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    cursor.execute(
+        "INSERT INTO transacao (conta_id, tipo, valor, data) VALUES (?, ?, ?, ?)",
+        (conta_id, tipo, valor, data)
+    )
+
+    conn.commit()
+    conn.close()
+
+
+def listar_transacoes(conta_id):
+    conn = conectar()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "SELECT tipo, valor, data FROM transacao WHERE conta_id = ? ORDER BY id",
+        (conta_id,)
+    )
+
+    rows = cursor.fetchall()
+    conn.close()
+    return rows
+
